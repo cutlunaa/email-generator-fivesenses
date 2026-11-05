@@ -46,6 +46,10 @@ button{
 }
 button.primary{background:var(--accent);color:var(--accent-ink)}
 button:disabled{opacity:.45;cursor:not-allowed}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:22px;border:1.5px solid var(--accent);border-radius:8px;overflow:hidden}
+.tab{border:0;border-radius:0;padding:10px 8px;font-size:.92rem;line-height:1.25}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tab small{display:block;font-weight:400;opacity:.85}
 .status{min-height:1.4em;margin-top:12px;font-size:.9rem;color:var(--accent)}
 .mail{
   background:var(--panel);border:1.5px solid var(--line);border-radius:10px;
@@ -66,6 +70,10 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
   <aside class="side">
     <h1>Email partnership</h1>
     <p class="sub">Ketik nama perusahaan, email langsung siap disalin.</p>
+    <div class="tabs" role="group" aria-label="Pilih template">
+      <button class="tab" data-t="1" aria-pressed="true">Email 1<small>Perkenalan</small></button>
+      <button class="tab" data-t="2" aria-pressed="false">Email 2<small>Follow up</small></button>
+    </div>
     <div class="field">
       <label for="company">Nama perusahaan</label>
       <input id="company" type="text" placeholder="contoh: China Trip" autocomplete="off" autofocus>
@@ -73,6 +81,7 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
     <div class="field">
       <label for="to">Email tujuan (opsional)</label>
       <input id="to" type="email" placeholder="contoh: info@chinatrip.com" autocomplete="off">
+      <div class="hint" id="threadHint"></div>
       <div class="hint">Diisi hanya jika ingin memakai tombol “Buka di aplikasi email”.</div>
     </div>
     <div class="btns">
@@ -89,7 +98,7 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
 
 <script>
 (function(){
-  var SUBJECT = "B2B Partnership Opportunity | Indonesian Massage & Spa Experiences in Jakarta";
+  var SUBJECT1 = "B2B Partnership Opportunity | Indonesian Massage & Spa Experiences in Jakarta";
   var PH = "[Nama Perusahaan]";
 
   var treatments = [
@@ -102,7 +111,7 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
     ["Various Spa Packages","a selection of massage, spa, and wellness packages to suit different guest preferences."]
   ];
 
-  var contacts = [
+  var contactsFull = [
     ["Address","Green Ville Blok AY No. 11, Duri Kepa, Kebon Jeruk, West Jakarta 11510, Indonesia",null],
     ["Phone","+62 21 5698 0456","tel:+622156980456"],
     ["WhatsApp","+62 813 1745 5004","https://wa.me/6281317455004"],
@@ -111,53 +120,74 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
     ["Instagram","https://www.instagram.com/fivesensesindo/","https://www.instagram.com/fivesensesindo/"]
   ];
 
-  function paragraphs(c){
-    return {
-      greet: "Dear " + c + " Team,",
-      intro: [
-        "Warm greetings from Five Senses Art & Beauty, Jakarta, Indonesia.",
-        "We are Five Senses Art & Beauty, a wellness, massage, and spa establishment located in West Jakarta, Indonesia. We understand that " + c + " provides travel services for visitors traveling to Jakarta and other destinations in Indonesia. We believe that some of your guests may be interested in enjoying a relaxing massage and spa experience during their stay in Jakarta.",
-        "With this in mind, we would like to introduce our services and propose a potential business partnership with " + c + ". We are open to discussing various cooperation models that would be mutually beneficial, such as referring guests to our spa, incorporating our treatments into your travel itineraries, or arranging special packages for your clients.",
-        "Some of our signature treatments and services include:"
-      ],
-      outro: [
-        "We would be delighted to welcome your guests and provide them with a comfortable and relaxing wellness experience during their visit to Jakarta.",
-        "We sincerely hope to establish a successful partnership with " + c + ". We would be happy to provide further information about our treatments, pricing, and potential cooperation arrangements at your convenience.",
-        "Thank you for your time and consideration. We look forward to the opportunity to work with your team."
-      ]
-    };
-  }
+  // Setiap template: subject, daftar blok (["p", teks] atau ["ul"]), kontak
+  var TEMPLATES = {
+    1: function(c){
+      return {
+        subject: SUBJECT1,
+        contacts: contactsFull,
+        blocks: [
+          ["p","Dear "+c+" Team,"],
+          ["p","Warm greetings from Five Senses Art & Beauty, Jakarta, Indonesia."],
+          ["p","We are Five Senses Art & Beauty, a wellness, massage, and spa establishment located in West Jakarta, Indonesia. We understand that "+c+" provides travel services for visitors traveling to Jakarta and other destinations in Indonesia. We believe that some of your guests may be interested in enjoying a relaxing massage and spa experience during their stay in Jakarta."],
+          ["p","With this in mind, we would like to introduce our services and propose a potential business partnership with "+c+". We are open to discussing various cooperation models that would be mutually beneficial, such as referring guests to our spa, incorporating our treatments into your travel itineraries, or arranging special packages for your clients."],
+          ["p","Some of our signature treatments and services include:"],
+          ["ul"],
+          ["p","We would be delighted to welcome your guests and provide them with a comfortable and relaxing wellness experience during their visit to Jakarta."],
+          ["p","We sincerely hope to establish a successful partnership with "+c+". We would be happy to provide further information about our treatments, pricing, and potential cooperation arrangements at your convenience."],
+          ["p","Thank you for your time and consideration. We look forward to the opportunity to work with your team."]
+        ]
+      };
+    },
+    2: function(c){
+      return {
+        subject: "Re: " + SUBJECT1,
+        contacts: contactsFull,
+        blocks: [
+          ["p","Dear "+c+" Team,"],
+          ["p","Warm greetings from Five Senses Art & Beauty, Jakarta, Indonesia."],
+          ["p","I hope this email finds you well."],
+          ["p","I am writing to kindly follow up on my previous email regarding a potential B2B partnership between "+c+" and Five Senses Art & Beauty."],
+          ["p","We would love to know if your team has had a chance to review our proposal and whether this collaboration might be of interest to your company."],
+          ["p","We believe our Indonesian massage and spa experiences could be a valuable addition to your travel offerings, providing your guests with an opportunity to enjoy a relaxing wellness experience during their stay in Jakarta."],
+          ["p","If this opportunity is of interest, we would be delighted to share further details about our treatments, pricing, and potential partnership arrangements."],
+          ["p","We would also appreciate hearing your thoughts or any feedback regarding this opportunity."],
+          ["p","Thank you for your time and consideration. We look forward to hearing from you."]
+        ]
+      };
+    }
+  };
 
   function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
-  function buildText(c){
-    var p = paragraphs(c), t = [];
-    t.push(p.greet, "");
-    p.intro.forEach(function(x){t.push(x,"");});
-    treatments.forEach(function(r){t.push("* "+r[0]+" \u2013 "+r[1]);});
-    t.push("");
-    p.outro.forEach(function(x){t.push(x,"");});
+  function buildText(tpl){
+    var t = [];
+    tpl.blocks.forEach(function(b){
+      if(b[0]==="p"){ t.push(b[1],""); }
+      else { treatments.forEach(function(r){t.push("* "+r[0]+" \u2013 "+r[1]);}); t.push(""); }
+    });
     t.push("Warm regards,","Cut Luna Sabrina","Development & Marketing Team","Five Senses Art & Beauty");
-    contacts.forEach(function(r){t.push(r[0]+": "+r[1]);});
+    tpl.contacts.forEach(function(r){t.push(r[0]+": "+r[1]);});
     return t.join("\n");
   }
 
-  // html: marked=true -> highlight company name (preview only)
-  function buildHtml(c, marked){
-    var p = paragraphs(c);
+  function buildHtml(tpl, c, marked){
     function fmt(s){
       var out = esc(s);
       if(marked){ out = out.split(esc(c)).join("<mark>"+esc(c)+"</mark>"); }
       return out;
     }
-    var h = "<p>"+fmt(p.greet)+"</p>";
-    p.intro.forEach(function(x){h += "<p>"+fmt(x)+"</p>";});
-    h += "<ul>";
-    treatments.forEach(function(r){h += "<li><b>"+esc(r[0])+"</b> \u2013 "+esc(r[1])+"</li>";});
-    h += "</ul>";
-    p.outro.forEach(function(x){h += "<p>"+fmt(x)+"</p>";});
+    var h = "";
+    tpl.blocks.forEach(function(b){
+      if(b[0]==="p"){ h += "<p>"+fmt(b[1])+"</p>"; }
+      else {
+        h += "<ul>";
+        treatments.forEach(function(r){h += "<li><b>"+esc(r[0])+"</b> \u2013 "+esc(r[1])+"</li>";});
+        h += "</ul>";
+      }
+    });
     h += '<p class="sig">Warm regards,<br>Cut Luna Sabrina<br>Development &amp; Marketing Team<br>Five Senses Art &amp; Beauty<br>';
-    contacts.forEach(function(r){
+    tpl.contacts.forEach(function(r){
       var v = r[2] ? '<a href="'+r[2]+'">'+esc(r[1])+'</a>' : esc(r[1]);
       h += esc(r[0])+": "+v+"<br>";
     });
@@ -166,19 +196,23 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
 
   var $ = function(id){return document.getElementById(id);};
   var company = $("company"), to = $("to"), preview = $("preview"), statusEl = $("status");
-  var timer;
+  var tabs = document.querySelectorAll(".tab");
+  var current = 1, timer;
 
   function name(){ return company.value.trim(); }
+  function tpl(c){ return TEMPLATES[current](c); }
 
   function render(){
     var n = name();
-    var shown = n || PH;
+    var t = tpl(n || PH);
     preview.innerHTML =
-      '<div class="subject"><span>Subjek</span>'+esc(SUBJECT)+'</div>' + buildHtml(shown, true);
-    var has = !!n;
-    $("copyBody").disabled = !has;
-    $("copySubject").disabled = false;
-    $("openMail").disabled = !has;
+      '<div class="subject"><span>Subjek</span>'+esc(t.subject)+'</div>' + buildHtml(t, n || PH, true);
+    $("copyBody").disabled = !n;
+    $("openMail").disabled = !n;
+    Array.prototype.forEach.call(tabs, function(b){
+      var on = Number(b.dataset.t) === current;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
   }
 
   function say(msg){
@@ -211,25 +245,30 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
     return copyPlain(text);
   }
 
+  Array.prototype.forEach.call(tabs, function(b){
+    b.addEventListener("click", function(){ current = Number(b.dataset.t); render(); });
+  });
+
   $("copyBody").addEventListener("click", function(){
     var n = name(); if(!n) return;
-    copyRich(buildHtml(n,false), buildText(n))
+    var t = tpl(n);
+    copyRich(buildHtml(t,n,false), buildText(t))
       .then(function(){say("Isi email tersalin. Tinggal tempel di Gmail/Outlook.");})
       .catch(function(){say("Gagal menyalin. Coba lagi atau blok teks secara manual.");});
   });
 
   $("copySubject").addEventListener("click", function(){
-    copyPlain(SUBJECT)
+    copyPlain(tpl(name() || PH).subject)
       .then(function(){say("Subjek tersalin.");})
       .catch(function(){say("Gagal menyalin subjek.");});
   });
 
   $("openMail").addEventListener("click", function(){
     var n = name(); if(!n) return;
-    var url = "mailto:" + encodeURIComponent(to.value.trim()) +
-      "?subject=" + encodeURIComponent(SUBJECT) +
-      "&body=" + encodeURIComponent(buildText(n));
-    window.location.href = url;
+    var t = tpl(n);
+    window.location.href = "mailto:" + encodeURIComponent(to.value.trim()) +
+      "?subject=" + encodeURIComponent(t.subject) +
+      "&body=" + encodeURIComponent(buildText(t));
   });
 
   $("clear").addEventListener("click", function(){
