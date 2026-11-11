@@ -46,9 +46,10 @@ button{
 }
 button.primary{background:var(--accent);color:var(--accent-ink)}
 button:disabled{opacity:.45;cursor:not-allowed}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:22px;border:1.5px solid var(--accent);border-radius:8px;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:0;margin-bottom:22px;border:1.5px solid var(--accent);border-radius:8px;overflow:hidden}
 .tab{border:0;border-radius:0;padding:10px 8px;font-size:.92rem;line-height:1.25}
 .tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tab:nth-child(n+3){border-top:1px solid var(--accent)}
 .tab small{display:block;font-weight:400;opacity:.85}
 .status{min-height:1.4em;margin-top:12px;font-size:.9rem;color:var(--accent)}
 .mail{
@@ -71,8 +72,10 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
     <h1>Email partnership</h1>
     <p class="sub">Ketik nama perusahaan, email langsung siap disalin.</p>
     <div class="tabs" role="group" aria-label="Pilih template">
-      <button class="tab" data-t="1" aria-pressed="true">Email 1<small>Perkenalan</small></button>
-      <button class="tab" data-t="2" aria-pressed="false">Email 2<small>Follow up</small></button>
+      <button class="tab" data-t="1" aria-pressed="true">Email 1<small>Luar negeri</small></button>
+      <button class="tab" data-t="2" aria-pressed="false">Email 2<small>Follow up luar negeri</small></button>
+      <button class="tab" data-t="3" aria-pressed="false">Email 3<small>Dalam negeri</small></button>
+      <button class="tab" data-t="4" aria-pressed="false">Email 4<small>Follow up dalam negeri</small></button>
     </div>
     <div class="field">
       <label for="company">Nama perusahaan</label>
@@ -99,6 +102,7 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
 <script>
 (function(){
   var SUBJECT1 = "B2B Partnership Opportunity | Indonesian Massage & Spa Experiences in Jakarta";
+  var SUBJECT3 = "B2B Partnership Opportunity | Spa & Wellness Experiences in Jakarta";
   var PH = "[Nama Perusahaan]";
 
   var treatments = [
@@ -150,9 +154,45 @@ mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
           ["p","I am writing to kindly follow up on my previous email regarding a potential B2B partnership between "+c+" and Five Senses Art & Beauty."],
           ["p","We would love to know if your team has had a chance to review our proposal and whether this collaboration might be of interest to your company."],
           ["p","We believe our Indonesian massage and spa experiences could be a valuable addition to your travel offerings, providing your guests with an opportunity to enjoy a relaxing wellness experience during their stay in Jakarta."],
-          ["p","If this opportunity interest you, we would be delighted to share further details about our treatments, pricing, and potential partnership arrangements."],
+          ["p","If this opportunity is of interest, we would be delighted to share further details about our treatments, pricing, and potential partnership arrangements."],
           ["p","We would also appreciate hearing your thoughts or any feedback regarding this opportunity."],
           ["p","Thank you for your time and consideration. We look forward to hearing from you."]
+        ]
+      };
+    },
+    3: function(c){
+      return {
+        subject: SUBJECT3,
+        contacts: contactsFull,
+        blocks: [
+          ["p","Dear "+c+" Team,"],
+          ["p","Warm greetings from Five Senses Art & Beauty, Jakarta, Indonesia."],
+          ["p","We are Five Senses Art & Beauty, a wellness, massage, and spa establishment located in West Jakarta, Indonesia. We understand that "+c+" provides travel services, tour packages, and travel arrangements for both domestic and international travelers visiting Jakarta and other destinations in Indonesia."],
+          ["p","We believe that some of your clients may be interested in enjoying a relaxing massage and spa experience as part of their travel itinerary, leisure activities, or holiday experience in Jakarta."],
+          ["p","With this in mind, we would like to introduce our services and propose a potential business partnership with "+c+". We are open to discussing various cooperation models that would be mutually beneficial, such as referring guests to our spa, incorporating our treatments into your tour itineraries, offering spa experiences as optional activities, or arranging special packages for your clients."],
+          ["p","Some of our signature treatments and services include:"],
+          ["ul"],
+          ["p","We would be delighted to welcome your clients and provide them with a comfortable and relaxing wellness experience during their visit to Jakarta."],
+          ["p","We sincerely hope to establish a successful partnership with "+c+". We would be happy to provide further information about our treatments, pricing, special packages, and potential cooperation arrangements at your convenience."],
+          ["p","Thank you for your time and consideration. We look forward to the opportunity to work with your team."]
+        ]
+      };
+    },
+    4: function(c){
+      return {
+        subject: "Re: " + SUBJECT3,
+        contacts: contactsFull,
+        blocks: [
+          ["p","Dear "+c+" Team,"],
+          ["p","Warm greetings from Five Senses Art & Beauty, Jakarta, Indonesia."],
+          ["p","I hope this email finds you well."],
+          ["p","I am writing to kindly follow up on my previous email regarding a potential B2B partnership between "+c+" and Five Senses Art & Beauty."],
+          ["p","We would love to know if your team has had a chance to review our proposal and whether this collaboration might be of interest to your company."],
+          ["p","We believe our massage and spa experiences could be a valuable addition to your travel offerings, providing your clients with an opportunity to enjoy a relaxing wellness experience as part of their travel itinerary, holiday activities, or visit to Jakarta."],
+          ["p","We see potential opportunities for collaboration, whether by recommending Five Senses to your clients, incorporating our spa experiences into your tour packages, or offering special wellness packages as optional activities for your guests."],
+          ["p","If this opportunity is of interest, we would be delighted to share further details about our treatments, pricing, special packages, and potential partnership arrangements."],
+          ["p","We would also appreciate hearing your thoughts or any feedback regarding this opportunity."],
+          ["p","Thank you for your time and consideration. We look forward to hearing from you and hopefully exploring a mutually beneficial partnership with your team."]
         ]
       };
     }
